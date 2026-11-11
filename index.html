@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Pre-calc: de la compra a la oferta</title>
+<style>
+  :root { --tinta:#1f2933; --suave:#616e7c; --linea:#d9e2ec; --fondo:#f5f7fa; --acento:#0b6e99; --verde:#1f7a4d; --rojo:#b42318; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.45 system-ui, "Segoe UI", sans-serif; color:var(--tinta); background:var(--fondo); }
+  header { padding:12px 22px 0; background:#fff; border-bottom:1px solid var(--linea); }
+  .cab { display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
+  header h1 { font-size:18px; margin:0; }
+  .modo label { margin-right:14px; cursor:pointer; }
+  nav { display:flex; gap:4px; margin-top:10px; }
+  nav button { border:1px solid var(--linea); border-bottom:none; border-radius:8px 8px 0 0; background:var(--fondo); padding:7px 16px; font:inherit; cursor:pointer; color:var(--suave); }
+  nav button.on { background:#fff; color:var(--tinta); font-weight:700; position:relative; top:1px; }
+  main { padding:18px 22px; max-width:1500px; margin:0 auto; }
+  .dos { display:grid; grid-template-columns: minmax(340px, 1fr) minmax(380px, 1.3fr); gap:18px; }
+  .tres { display:grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap:18px; }
+  @media (max-width: 900px) { .dos { grid-template-columns: 1fr; } }
+  section { background:#fff; border:1px solid var(--linea); border-radius:10px; padding:14px 16px; margin-bottom:16px; }
+  h2 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--suave); margin:0 0 10px; }
+  .fila { display:grid; grid-template-columns: 1fr 110px; gap:2px 12px; align-items:center; margin-bottom:10px; }
+  .fila label { font-weight:600; }
+  .fila output { text-align:right; font-variant-numeric: tabular-nums; font-weight:700; color:var(--acento); }
+  .fila input[type=range] { grid-column: 1 / -1; width:100%; accent-color: var(--acento); }
+  .fila small, small.n { grid-column: 1 / -1; color:var(--suave); }
+  .par { display:grid; grid-template-columns: 1fr 1fr; gap:10px 14px; margin-bottom:10px; }
+  .par label, .uno label { display:block; font-weight:600; margin-bottom:3px; }
+  select, input[type=number], input[type=text] { width:100%; padding:6px 8px; border:1px solid var(--linea); border-radius:6px; font:inherit; background:#fff; }
+  .casilla { display:flex; gap:8px; align-items:center; margin:6px 0; }
+  table { width:100%; border-collapse:collapse; font-variant-numeric: tabular-nums; }
+  th, td { padding:5px 6px; border-bottom:1px solid var(--linea); text-align:right; }
+  th:first-child, td:first-child { text-align:left; }
+  th { font-size:12px; color:var(--suave); font-weight:600; }
+  td input { text-align:right; }
+  td:first-child input { text-align:left; }
+  td.res { font-weight:700; color:var(--acento); white-space:nowrap; }
+  button { font:inherit; padding:5px 10px; border:1px solid var(--linea); border-radius:6px; background:#fff; cursor:pointer; }
+  button.x { border:none; color:var(--suave); padding:2px 6px; }
+  .grande { display:flex; gap:26px; flex-wrap:wrap; align-items:baseline; margin-bottom:6px; }
+  .grande div span { display:block; font-size:12px; color:var(--suave); text-transform:uppercase; letter-spacing:.05em; }
+  .grande div strong { font-size:30px; font-variant-numeric: tabular-nums; }
+  .grande .sec strong { font-size:20px; }
+  .neg { color:var(--rojo); } .pos { color:var(--verde); }
+  .desglose td { padding:4px 6px; }
+  .desglose tr.sub td { font-weight:700; border-top:2px solid var(--tinta); }
+  .desglose td.nota, td.nota { text-align:left; color:var(--suave); font-size:12.5px; }
+  .barra { height:8px; background:var(--acento); border-radius:4px; opacity:.55; }
+  .aviso { color:var(--suave); font-size:12.5px; margin:8px 0 0; }
+  details summary { cursor:pointer; font-weight:600; margin-bottom:8px; }
+  textarea { width:100%; min-height:150px; font:13px/1.4 ui-monospace, Consolas, monospace; border:1px solid var(--linea); border-radius:6px; padding:8px; }
+  .acciones { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; align-items:center; }
+  .ajuste { display:grid; grid-template-columns: 1fr 110px; gap:6px 10px; align-items:center; }
+  .ajuste label { font-weight:500; } .ajuste small { grid-column:1 / -1; color:var(--suave); margin-top:-4px; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<header>
+  <div class="cab">
+    <h1>Pre-calc: de la compra a la oferta</h1>
+    <div class="modo">
+      <label><input type="radio" name="modo" value="venta" checked> Tengo precios de compra → precio de venta</label>
+      <label><input type="radio" name="modo" value="compra"> Tengo precios de venta → compra máxima</label>
+    </div>
+  </div>
+  <nav>
+    <button data-tab="calculo" class="on">Cálculo</button>
+    <button data-tab="tarifas">Tarifas y tipos</button>
+  </nav>
+</header>
+
+<main id="tab-calculo">
+ <div class="dos">
+  <div>
+    <section>
+      <h2>La operación</h2>
+      <div class="par">
+        <div><label for="puerto">Puerto</label>
+          <select id="puerto"><option value="sagunto">Sagunto</option><option value="bilbao">Bilbao</option><option value="cartagena">Cartagena</option></select></div>
+        <div><label for="material">Material</label>
+          <select id="material"><option value="embalada">Bobina embalada (CRC, HDG, P&amp;O, PPGI)</option><option value="hrc">HRC</option><option value="hrp">HRP</option></select></div>
+        <div><label for="pago">Cómo paga el cliente</label>
+          <select id="pago"><option value="ot">Open terms (seguro de crédito)</option><option value="lc">Carta de crédito</option><option value="cad">Contra documentos (CAD)</option></select></div>
+        <div><label for="pagoFabrica">Cómo se paga a la fábrica</label>
+          <select id="pagoFabrica"><option value="lc">Carta de crédito a la vista</option><option value="cad">Anticipo y resto contra documentos</option><option value="nada">Sin coste de pago</option></select></div>
+        <div><label for="ruta">Ruta del barco</label>
+          <select id="ruta"><option value="cabo">Cabo de Buena Esperanza</option><option value="suez">Suez</option></select></div>
+        <div><label for="moneda">Moneda de la compra</label>
+          <select id="moneda"><option value="USD">USD</option><option value="EUR">EUR</option></select></div>
+      </div>
+      <div class="casilla"><input type="checkbox" id="iva" checked><label for="iva">Financiar también el IVA</label></div>
+      <div class="casilla"><input type="checkbox" id="ligera"><label for="ligera">Bobinas de menos de 10 MT de media (Sagunto)</label></div>
+      <div class="casilla"><input type="checkbox" id="grupo3"><label for="grupo3">Espesor de más de 4,75 mm (T3 grupo 3)</label></div>
+    </section>
+
+    <section>
+      <h2>Lo que cambia en cada operación</h2>
+      <div class="fila"><label for="margen">Margen objetivo</label><output id="o-margen"></output>
+        <input type="range" id="margen" min="0" max="150" step="1" value="15"><small>EUR/MT después de intereses, el mismo en cada ítem</small></div>
+      <div class="par">
+        <div><label for="spot">Spot EUR/USD</label><input type="number" id="spot" step="0.0001" value="1.1192"></div>
+        <div><label for="fx">Tipo de cambio usado</label><input type="text" id="fx" readonly></div>
+      </div>
+      <div class="fila"><label for="pips">Forward hasta el embarque</label><output id="o-pips"></output>
+        <input type="range" id="pips" min="0" max="150" step="1" value="30">
+        <small>columna Bid en diezmilésimas, con el plazo a la baja · <a href="https://www.barchart.com/forex/quotes/%5EEURUSD/forward-rates" target="_blank" rel="noopener">ver spot y forwards</a></small></div>
+      <div class="fila"><label for="transito">Días de tránsito</label><output id="o-transito"></output>
+        <input type="range" id="transito" min="20" max="90" step="5" value="60"><small>del embarque a la llegada al puerto</small></div>
+      <div class="fila"><label for="plazo">Plazo de pago del cliente</label><output id="o-plazo"></output>
+        <input type="range" id="plazo" min="0" max="150" step="15" value="30"><small id="n-plazo"></small></div>
+      <div class="fila"><label for="descarga">Descarga y T3</label><output id="o-descarga"></output>
+        <input type="range" id="descarga" min="0" max="30" step="0.01" value="9.18"><small id="n-descarga"></small></div>
+      <div class="fila"><label for="cbam">CBAM</label><output id="o-cbam"></output>
+        <input type="range" id="cbam" min="0" max="200" step="1" value="50"><small>EUR/MT, según origen y material</small></div>
+      <div class="fila"><label for="trimestre">Despacho por trimestre (cuotas)</label><output id="o-trimestre"></output>
+        <input type="range" id="trimestre" min="20" max="100" step="5" value="60"><small id="n-trimestre"></small></div>
+    </section>
+
+    <section>
+      <details id="mas-costes">
+        <summary>Más costes de esta operación</summary>
+        <div class="par">
+          <div><label for="flete">Flete marítimo (<span class="mon">USD</span>/MT)</label><input type="number" id="flete" value="0" step="1"></div>
+          <div><label for="interior">Transporte interior (EUR/MT)</label><input type="number" id="interior" value="0" step="0.5"></div>
+          <div><label for="arancel">Arancel (% sobre CFR)</label><input type="number" id="arancel" value="0" step="0.1"></div>
+          <div><label for="antidumping">Antidumping (% sobre CFR)</label><input type="number" id="antidumping" value="0" step="0.1"></div>
+          <div><label for="comCompra">Comisión de compra (<span class="mon">USD</span>/MT)</label><input type="number" id="comCompra" value="0" step="0.5"></div>
+          <div><label for="comVenta">Comisión de venta (EUR/MT)</label><input type="number" id="comVenta" value="0" step="0.5"></div>
+          <div><label for="recargo">Recargo de este cliente (EUR/MT)</label><input type="number" id="recargo" value="0" step="1"></div>
+          <div><label for="otros">Otros costes (EUR/MT)</label><input type="number" id="otros" value="0" step="0.5"></div>
+          <div><label for="anticipo">Anticipo a la fábrica (%)</label><input type="number" id="anticipo" value="0" step="1"></div>
+          <div><label for="diasAnticipo">Días del anticipo al embarque</label><input type="number" id="diasAnticipo" value="60" step="5"></div>
+        </div>
+        <small class="n">El recargo del cliente se suma al margen. El anticipo solo cuenta si a la fábrica se le paga con anticipo y resto contra documentos.</small>
+      </details>
+    </section>
+  </div>
+
+  <div>
+    <section>
+      <h2>Resultado</h2>
+      <div class="grande">
+        <div><span id="t-principal"></span><strong id="r-principal"></strong></div>
+        <div class="sec"><span>Beneficio total</span><strong id="r-beneficio"></strong></div>
+        <div class="sec"><span>Margen sobre la venta</span><strong id="r-pct"></strong></div>
+      </div>
+      <table id="items">
+        <thead><tr><th>Ítem</th><th>MT</th><th id="th-dato"></th><th id="th-res"></th><th>Beneficio EUR/MT</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="acciones"><button id="mas">Añadir ítem</button><button id="enlace">Copiar enlace a este cálculo</button><span class="aviso" id="hecho"></span></div>
+      <p class="aviso" id="aviso"></p>
+    </section>
+    <section>
+      <h2>De dónde sale, por MT</h2>
+      <table class="desglose" id="desglose"><tbody></tbody></table>
+    </section>
+    <section>
+      <h2>Texto de la oferta</h2>
+      <div class="par">
+        <div><label for="embarque">Embarque</label><input type="text" id="embarque" placeholder="enero de 2027"></div>
+        <div><label for="validez">Validez</label><input type="text" id="validez" placeholder="hasta el viernes"></div>
+      </div>
+      <textarea id="oferta" readonly></textarea>
+      <div class="acciones"><button id="copiar">Copiar texto</button></div>
+    </section>
+  </div>
+ </div>
+</main>
+
+<main id="tab-tarifas" hidden>
+  <p class="aviso" style="margin:0 0 14px">Lo que se mueve cada varios meses. Los cambios se guardan en este navegador y viajan en el enlace del cálculo.
+    <button id="restaurar" style="margin-left:10px">Volver a los valores de partida</button></p>
+  <div class="tres">
+    <section><h2>Financiación</h2><div class="ajuste" id="a-fin"></div>
+      <p class="aviso"><a href="https://www.euribor-rates.eu/es/tipos-euribor-actualmente/2/euribor-valor-3-meses/" target="_blank" rel="noopener">Ver el euríbor a 3 meses de hoy</a></p></section>
+    <section><h2>Formas de pago y seguros</h2><div class="ajuste" id="a-pago"></div></section>
+    <section><h2>Varios</h2><div class="ajuste" id="a-varios"></div></section>
+  </div>
+  <div class="tres" id="puertos"></div>
+</main>
+
+<script>
+// ---------- valores de partida ----------
+const PARTIDA = {
+  interesEur: 5.9, euribor: 2.738, diferencialLc: 1, interesPropio: 11, iva: 21, diasIva: 30,
+  seguroCabo: 0.33, seguroSuez: 0.58, coberturaSeguro: 110, lcImport: 0.4, lcExport: 0.58, tolerancia: 10,
+  cad: 0.1, banco: 0.05, seguroCredito: 0.28, fijoPedido: 0.18, umbralT3: 4.75,
+  puertos: {
+    sagunto:   { nombre: 'Sagunto',   embalada: 7.35, hrc: 7.35, hrp: null, ligera: 8.25, g3: 1.0939, g4: 1.8317,
+                 tramos: [[5, 0, 0], [30, 0.09, 0.08], [45, 0.11, 0.08], [60, 0.20, 0.10], [90, 0.28, 0.15], [9999, 0.28, 0.15]] },
+    bilbao:    { nombre: 'Bilbao',    embalada: 4.74, hrc: 3.94, hrp: 11.9, ligera: null, g3: 1.2, g4: 2.0,
+                 tramos: [[30, 0, 0], [9999, 0.069, 0.047]] },
+    cartagena: { nombre: 'Cartagena', embalada: 6.2, hrc: 6.2, hrp: null, ligera: null, g3: 0, g4: 0,
+                 tramos: [[45, 0, 0], [9999, 0.06, 0.025]] },
+  },
+};
+const AJUSTES = {
+  'a-fin': [
+    ['interesEur', 'Interés en open terms (% anual)', 'lo anuncia la financiera; también para contra documentos'],
+    ['euribor', 'Euríbor a 3 meses (%)', 'último valor diario'],
+    ['diferencialLc', 'Diferencial con carta de crédito (%)', 'interés con carta de crédito = euríbor + diferencial'],
+    ['interesPropio', 'Interés de anticipos con recursos propios (%)', ''],
+    ['iva', 'IVA (%)', ''], ['diasIva', 'Días que se financia el IVA', ''],
+  ],
+  'a-pago': [
+    ['seguroCabo', 'Seguro marítimo por el Cabo (%)', 'el peor caso de las dos pólizas'],
+    ['seguroSuez', 'Seguro marítimo por Suez (%)', ''],
+    ['coberturaSeguro', 'Valor asegurado (% de la venta)', ''],
+    ['lcImport', 'Carta de crédito a la fábrica (%)', 'sobre la compra más la tolerancia'],
+    ['lcExport', 'Carta de crédito del cliente (%)', 'sobre la venta más la tolerancia'],
+    ['tolerancia', 'Tolerancia de las cartas de crédito (%)', ''],
+    ['cad', 'Pago contra documentos (%)', 'en compra o en venta'],
+    ['seguroCredito', 'Seguro de crédito (%)', 'sobre la venta, en open terms'],
+    ['banco', 'Gastos bancarios (%)', 'sobre la venta, siempre'],
+  ],
+  'a-varios': [
+    ['fijoPedido', 'Coste fijo de pedido (USD/MT)', ''],
+    ['umbralT3', 'Umbral de espesor del T3 (mm)', 'por encima, grupo 3; hasta ahí, grupo 4'],
+  ],
+};
+
+// ---------- cálculo (sin pantalla) ----------
+function descargaAproximada(T, puerto, material, ligera, grupo3) {
+  const t = T.puertos[puerto];
+  let d = t[material], nota = '';
+  if (d == null) { d = t.embalada; nota = 'sin tarifa de HRP en este puerto: se usa la de bobina'; }
+  if (ligera && t.ligera != null && material !== 'hrp') d = t.ligera;
+  return { valor: d + (grupo3 ? t.g3 : t.g4), nota };
+}
+function almacenaje(dias, tramos, descubierto) {
+  let total = 0, desde = 0;
+  for (const [hasta, cub, desc] of tramos) {
+    total += Math.max(0, Math.min(dias, hasta) - desde) * (descubierto ? desc : cub);
+    desde = hasta;
+    if (dias <= hasta) break;
+  }
+  return total;
+}
+// Extra de financiación y almacenaje si cada trimestre solo se despacha una parte de lo que queda.
+function extraCuotas(T, valor, puerto, descubierto, pct, interes) {
+  const tramos = T.puertos[puerto].tramos;
+  let queda = 1, fin = 0, alm = 0;
+  for (let k = 0; k < 12 && queda > 1e-9; k++) {
+    const sale = k === 11 ? queda : queda * pct, dias = 90 * k;
+    fin += sale * valor * interes * dias / 360;
+    alm += sale * almacenaje(dias, tramos, descubierto);
+    queda -= sale;
+  }
+  return { fin, alm };
+}
+function calcular(p, items, T) {
+  const fxMercado = p.spot + p.pips / 10000;
+  const fx = p.moneda === 'EUR' ? 1 : fxMercado;
+  const dias = p.transito + p.plazo;
+  const tasa = (p.pago === 'lc' ? T.euribor + T.diferencialLc : T.interesEur) / 100;
+  const pctInteres = tasa * dias / 360 + (p.iva ? T.iva / 100 * tasa * T.diasIva / 360 : 0);
+  const pctSeguro = (p.ruta === 'suez' ? T.seguroSuez : T.seguroCabo) / 100 * T.coberturaSeguro / 100;
+  const tol = 1 + T.tolerancia / 100;
+  const pctPago = { ot: T.seguroCredito / 100, lc: T.lcExport / 100 * tol, cad: T.cad / 100 }[p.pago];
+  const pctBanco = T.banco / 100;
+  const s = pctSeguro + pctBanco + pctPago + pctInteres;
+  const pctPagoFabrica = { lc: T.lcImport / 100 * tol, cad: T.cad / 100, nada: 0 }[p.pagoFabrica];
+  const pctAnticipo = p.pagoFabrica === 'cad' ? p.anticipo / 100 * T.interesPropio / 100 * p.diasAnticipo / 360 : 0;
+  const pctAduana = (p.arancel + p.antidumping) / 100;
+  const k = 1 + pctPagoFabrica + pctAnticipo + pctAduana;
+  const flete = p.flete / fx, comCompra = p.comCompra / fx, fijoPedido = T.fijoPedido / fxMercado;
+  const descubierto = p.material !== 'embalada';
+  const objetivo = p.margen + p.recargo;
+  const mt = items.reduce((a, it) => a + it.mt, 0);
+
+  let extra = { fin: 0, alm: 0 }, filas = [], compraMedia = 0, ventaMedia = 0, fijos = 0;
+  for (let vuelta = 0; vuelta < 6; vuelta++) {
+    fijos = flete * (1 + pctAduana) + p.interior + p.descarga + p.cbam + extra.fin + extra.alm
+          + fijoPedido + comCompra + p.comVenta + p.otros;
+    filas = items.map(it => {
+      let compraEur, venta, compra;
+      if (p.modo === 'venta') {
+        compra = it.precio; compraEur = compra / fx;
+        venta = Math.round((compraEur * k + fijos + objetivo) / (1 - s));
+      } else {
+        venta = it.precio;
+        compra = Math.floor((venta * (1 - s) - fijos - objetivo) / k * fx);
+        compraEur = compra / fx;
+      }
+      return { ...it, compra, compraEur, venta, beneficio: venta * (1 - s) - compraEur * k - fijos };
+    });
+    compraMedia = mt ? filas.reduce((a, f) => a + f.compraEur * f.mt, 0) / mt : 0;
+    ventaMedia = mt ? filas.reduce((a, f) => a + f.venta * f.mt, 0) / mt : 0;
+    extra = extraCuotas(T, compraMedia, p.puerto, descubierto, p.trimestre / 100, tasa);
+  }
+  const pc = v => (v * 100).toFixed(3).replace('.', ',') + ' %';
+  const lineas = [
+    ['Compra', compraMedia, p.moneda === 'EUR' ? '' : `${(compraMedia * fx).toFixed(2).replace('.', ',')} USD al cambio ${fx.toFixed(4).replace('.', ',')}`],
+    ['Flete marítimo', flete, ''],
+    ['Arancel y antidumping', (compraMedia + flete) * pctAduana, pc(pctAduana) + ' sobre CFR'],
+    ['Transporte interior', p.interior, ''],
+    ['Descarga y T3', p.descarga, ''],
+    ['CBAM', p.cbam, ''],
+    ['Extra por cuotas: financiación', extra.fin, ''],
+    ['Extra por cuotas: almacenaje', extra.alm, descubierto ? 'a descubierto' : 'a cubierto'],
+    ['Pago a la fábrica', compraMedia * pctPagoFabrica, pc(pctPagoFabrica) + ' de la compra'],
+    ['Anticipo con recursos propios', compraMedia * pctAnticipo, ''],
+    ['Comisiones', comCompra + p.comVenta, ''],
+    ['Coste fijo de pedido', fijoPedido, ''],
+    ['Otros costes', p.otros, ''],
+    ['Seguro marítimo', ventaMedia * pctSeguro, pc(pctSeguro) + ' de la venta'],
+    ['Gastos bancarios', ventaMedia * pctBanco, pc(pctBanco) + ' de la venta'],
+    [{ ot: 'Seguro de crédito', lc: 'Carta de crédito del cliente', cad: 'Pago contra documentos' }[p.pago], ventaMedia * pctPago, pc(pctPago) + ' de la venta'],
+    ['Intereses', ventaMedia * pctInteres, `${dias} días al ${(tasa * 100).toFixed(2).replace('.', ',')} %` + (p.iva ? `, más el IVA ${T.diasIva} días` : '')],
+  ];
+  const coste = lineas.reduce((a, l) => a + l[1], 0);
+  const beneficio = ventaMedia - coste;
+  return { fx, fxMercado, mt, filas, lineas, coste, ventaMedia, compraMedia, beneficio, total: beneficio * mt,
+           pct: ventaMedia ? beneficio / ventaMedia : 0, tasa, dias, extra: extra.fin + extra.alm };
+}
+
+// ---------- pantalla ----------
+if (typeof document !== 'undefined') {
+  const $ = id => document.getElementById(id);
+  const n = (v, d = 2) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d, useGrouping: 'always' });
+  const copia = o => JSON.parse(JSON.stringify(o));
+  const CAMPOS = ['puerto', 'material', 'pago', 'pagoFabrica', 'ruta', 'moneda', 'spot', 'pips', 'transito', 'plazo', 'descarga', 'cbam',
+    'trimestre', 'margen', 'flete', 'interior', 'arancel', 'antidumping', 'comCompra', 'comVenta', 'recargo', 'otros', 'anticipo',
+    'diasAnticipo', 'embarque', 'validez'];
+  const CASILLAS = ['iva', 'ligera', 'grupo3'];
+  const TEXTO = ['puerto', 'material', 'pago', 'pagoFabrica', 'ruta', 'moneda', 'embarque', 'validez'];
+  let T = copia(PARTIDA);
+  let items = [
+    { nombre: 'S350GD Z275 1,88 × 1090 mm', mt: 100, precio: 825 },
+    { nombre: 'DX51D Z275 2,85 × 1200 mm', mt: 100, precio: 779 },
+    { nombre: 'DX51D Z180 1,40 × 1250 mm', mt: 100, precio: 814 },
+    { nombre: 'DX51D Z275 1,41 × 1250 mm', mt: 150, precio: 846 },
+    { nombre: 'DX51D Z275 1,87 × 1250 mm', mt: 150, precio: 813 },
+  ];
+  let ultimo = null;
+  const modo = () => document.querySelector('input[name=modo]:checked').value;
+
+  function parametros() {
+    const p = { modo: modo() };
+    CAMPOS.forEach(c => { p[c] = TEXTO.includes(c) ? $(c).value : (+$(c).value || 0); });
+    CASILLAS.forEach(c => { p[c] = $(c).checked; });
+    if (!p.spot) p.spot = 1;
+    return p;
+  }
+
+  // Los aproximados: se proponen al cambiar la operación y luego se pueden mover con las barras.
+  function proponer(soloDescarga) {
+    const d = descargaAproximada(T, $('puerto').value, $('material').value, $('ligera').checked, $('grupo3').checked);
+    $('descarga').value = d.valor.toFixed(2);
+    $('n-descarga').textContent = 'EUR/MT, de las tarifas del puerto' + (d.nota ? ' (' + d.nota + ')' : '');
+    if (!soloDescarga) $('iva').checked = $('pago').value === 'ot';
+    pintar();
+  }
+
+  function pintarItems(r) {
+    const venta = modo() === 'venta', mon = $('moneda').value;
+    $('th-dato').textContent = venta ? `Compra ${mon}/MT` : 'Venta EUR/MT';
+    $('th-res').textContent = venta ? 'Venta EUR/MT' : `Compra máx. ${mon}/MT`;
+    const tb = document.querySelector('#items tbody');
+    if (tb.children.length !== items.length) {
+      tb.innerHTML = items.map((it, k) => `<tr>
+        <td><input type="text" data-k="${k}" data-c="nombre" value="${it.nombre.replace(/"/g, '&quot;')}"></td>
+        <td><input type="number" data-k="${k}" data-c="mt" value="${it.mt}" style="width:80px"></td>
+        <td><input type="number" data-k="${k}" data-c="precio" value="${it.precio}" style="width:90px"></td>
+        <td class="res"></td><td class="ben"></td><td><button class="x" data-quitar="${k}" title="Quitar">✕</button></td></tr>`).join('');
+    }
+    r.filas.forEach((f, k) => {
+      tb.children[k].querySelector('.res').textContent = n(venta ? f.venta : f.compra, 0);
+      const b = tb.children[k].querySelector('.ben');
+      b.textContent = n(f.beneficio); b.className = 'ben ' + (f.beneficio < 0 ? 'neg' : '');
+    });
+  }
+
+  function pintarOferta(p, r) {
+    const pago = { ot: `a ${p.plazo} días desde la entrega`, lc: `carta de crédito a ${p.plazo} días`, cad: 'contra documentos' }[p.pago];
+    const lineas = r.filas.map(f => `- ${f.nombre}: ${n(f.mt, 0)} MT a ${n(f.venta, 0)} EUR/MT`);
+    $('oferta').value = [
+      `Entrega: puerto de ${T.puertos[p.puerto].nombre}` + (p.interior ? ', con transporte incluido' : ''),
+      p.embarque ? `Embarque: ${p.embarque}` : null,
+      `Forma de pago: ${pago}`,
+      '', ...lineas, '',
+      `Total: ${n(r.mt, 0)} MT` + (p.validez ? `\nValidez de la oferta: ${p.validez}` : ''),
+    ].filter(l => l !== null).join('\n');
+  }
+
+  function pintar() {
+    const p = parametros();
+    const r = calcular(p, items, T);
+    ultimo = r;
+    document.querySelectorAll('.mon').forEach(e => { e.textContent = p.moneda; });
+    $('o-margen').textContent = n(p.margen, 0) + ' EUR/MT';
+    $('o-pips').textContent = '+' + n(p.pips / 10000, 4);
+    $('fx').value = p.moneda === 'EUR' ? 'compra en EUR' : n(r.fx, 4);
+    $('o-transito').textContent = p.transito + ' días';
+    $('o-plazo').textContent = p.plazo + ' días';
+    $('n-plazo').textContent = `días desde la entrega; se financian ${r.dias} días al ${n(r.tasa * 100)} %`;
+    $('o-descarga').textContent = n(p.descarga) + ' EUR/MT';
+    $('o-cbam').textContent = n(p.cbam, 0) + ' EUR/MT';
+    $('o-trimestre').textContent = p.trimestre + ' %';
+    $('n-trimestre').textContent = p.trimestre >= 100 ? 'todo se despacha a la llegada: sin extra'
+      : `de lo que queda cada trimestre: ${n(r.extra)} EUR/MT de extra de financiación y almacenaje`;
+    const venta = p.modo === 'venta';
+    $('t-principal').textContent = venta ? 'Precio medio de venta' : 'Compra máxima media';
+    $('r-principal').textContent = venta ? n(r.ventaMedia) + ' EUR/MT' : n(r.compraMedia * r.fx) + ` ${p.moneda}/MT`;
+    $('r-beneficio').textContent = n(r.total, 0) + ' EUR';
+    $('r-beneficio').className = r.total < 0 ? 'neg' : 'pos';
+    $('r-pct').textContent = n(r.pct * 100, 1) + ' %';
+    pintarItems(r);
+    const visibles = r.lineas.filter((l, k) => k === 0 || Math.abs(l[1]) > 0.0005);
+    const max = Math.max(...visibles.slice(1).map(l => l[1]), 1);
+    $('desglose').querySelector('tbody').innerHTML =
+      visibles.map((l, k) => `<tr><td>${l[0]}</td><td>${n(l[1])}</td>
+        <td style="width:26%">${k ? `<div class="barra" style="width:${Math.max(0, l[1]) / max * 100}%"></div>` : ''}</td>
+        <td class="nota">${l[2]}</td></tr>`).join('') +
+      `<tr class="sub"><td>Coste total</td><td>${n(r.coste)}</td><td></td><td></td></tr>
+       <tr><td>Beneficio después de intereses</td><td>${n(r.beneficio)}</td><td></td>
+         <td class="nota">objetivo ${n(p.margen + p.recargo, 0)}; la diferencia es el redondeo</td></tr>
+       <tr class="sub"><td>Venta</td><td>${n(r.ventaMedia)}</td><td></td><td class="nota">${n(r.mt, 0)} MT</td></tr>`;
+    $('aviso').textContent = venta ? 'El precio de venta de cada ítem se redondea al euro.'
+      : 'La compra máxima de cada ítem se redondea hacia abajo, a la unidad.';
+    pintarOferta(p, r);
+    guardar();
+  }
+
+  // ----- pestaña de tarifas -----
+  function pintarTarifas() {
+    for (const [caja, lista] of Object.entries(AJUSTES)) {
+      $(caja).innerHTML = lista.map(([k, texto, nota]) =>
+        `<label for="t-${k}">${texto}</label><input type="number" id="t-${k}" data-t="${k}" step="any" value="${T[k]}">` +
+        (nota ? `<small>${nota}</small>` : '')).join('');
+    }
+    $('puertos').innerHTML = Object.entries(T.puertos).map(([id, t]) => `<section><h2>${t.nombre}</h2>
+      <div class="ajuste">` + [['embalada', 'Desestiba, bobina embalada'], ['hrc', 'Desestiba, HRC'], ['hrp', 'Desestiba, HRP'],
+        ['ligera', 'Desestiba, bobina de menos de 10 MT'], ['g3', 'T3 grupo 3'], ['g4', 'T3 grupo 4']].map(([c, texto]) =>
+        `<label>${texto} (EUR/MT)</label><input type="number" step="any" data-p="${id}" data-c="${c}" value="${t[c] ?? ''}" placeholder="sin tarifa">`).join('') + `</div>
+      <table style="margin-top:10px"><thead><tr><th>Almacenaje hasta el día</th><th>Cubierto</th><th>Descubierto</th></tr></thead><tbody>` +
+      t.tramos.map((tr, k) => `<tr>
+        <td>${tr[0] >= 9999 ? 'en adelante' : `<input type="number" data-p="${id}" data-tr="${k}" data-i="0" value="${tr[0]}" style="width:80px">`}</td>
+        <td><input type="number" step="any" data-p="${id}" data-tr="${k}" data-i="1" value="${tr[1]}" style="width:80px"></td>
+        <td><input type="number" step="any" data-p="${id}" data-tr="${k}" data-i="2" value="${tr[2]}" style="width:80px"></td></tr>`).join('') +
+      `</tbody></table><p class="aviso">EUR por MT y día.</p></section>`).join('');
+  }
+
+  // ----- guardar, enlazar -----
+  function estado() {
+    const p = parametros();
+    return { p, items, T };
+  }
+  function guardar() {
+    try { localStorage.setItem('precalc', JSON.stringify(estado())); } catch (e) { /* sin almacenamiento */ }
+  }
+  function cargar(e) {
+    if (!e) return false;
+    if (e.T) T = Object.assign(copia(PARTIDA), e.T);
+    if (Array.isArray(e.items) && e.items.length) items = e.items;
+    if (e.p) {
+      CAMPOS.forEach(c => { if (e.p[c] != null) $(c).value = e.p[c]; });
+      CASILLAS.forEach(c => { if (e.p[c] != null) $(c).checked = e.p[c]; });
+      const r = document.querySelector(`input[name=modo][value=${e.p.modo === 'compra' ? 'compra' : 'venta'}]`);
+      if (r) r.checked = true;
+    }
+    return true;
+  }
+  function deTexto(t) { try { return JSON.parse(decodeURIComponent(escape(atob(t)))); } catch (e) { return null; } }
+  function aTexto(o) { return btoa(unescape(encodeURIComponent(JSON.stringify(o)))); }
+
+  document.addEventListener('input', e => {
+    const t = e.target, d = t.dataset || {};
+    if (d.c && d.k != null) { items[+d.k][d.c] = d.c === 'nombre' ? t.value : (+t.value || 0); pintar(); }
+    else if (d.t) { T[d.t] = +t.value || 0; pintar(); }
+    else if (d.p && d.tr != null) { T.puertos[d.p].tramos[+d.tr][+d.i] = +t.value || 0; pintar(); }
+    else if (d.p) { T.puertos[d.p][d.c] = t.value === '' ? null : +t.value; proponer(true); }
+    else if (['puerto', 'material', 'ligera', 'grupo3'].includes(t.id)) proponer(true);
+    else if (t.id === 'pago') proponer(false);
+    else if (t.name === 'modo') {
+      // Al cambiar de sentido, lo calculado pasa a ser el dato de partida.
+      if (ultimo) items = ultimo.filas.map(f => ({ nombre: f.nombre, mt: f.mt, precio: t.value === 'venta' ? f.compra : f.venta }));
+      document.querySelector('#items tbody').innerHTML = '';
+      pintar();
+    } else pintar();
+  });
+  document.addEventListener('click', e => {
+    const t = e.target, d = t.dataset || {};
+    if (d.tab) {
+      document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b === t));
+      $('tab-calculo').hidden = d.tab !== 'calculo'; $('tab-tarifas').hidden = d.tab !== 'tarifas';
+    } else if (t.id === 'mas') { items.push({ nombre: 'Ítem nuevo', mt: 100, precio: modo() === 'venta' ? 800 : 900 }); document.querySelector('#items tbody').innerHTML = ''; pintar(); }
+    else if (d.quitar != null) { items.splice(+d.quitar, 1); document.querySelector('#items tbody').innerHTML = ''; pintar(); }
+    else if (t.id === 'restaurar') { T = copia(PARTIDA); pintarTarifas(); proponer(true); }
+    else if (t.id === 'copiar') { navigator.clipboard.writeText($('oferta').value); }
+    else if (t.id === 'enlace') {
+      const url = location.origin + location.pathname + '#' + aTexto(estado());
+      navigator.clipboard.writeText(url).then(() => { $('hecho').textContent = 'Enlace copiado'; setTimeout(() => { $('hecho').textContent = ''; }, 2500); });
+    }
+  });
+
+  let habia = false;
+  if (location.hash.length > 1) habia = cargar(deTexto(location.hash.slice(1)));
+  if (!habia) { try { habia = cargar(JSON.parse(localStorage.getItem('precalc'))); } catch (e) { /* nada guardado */ } }
+  pintarTarifas();
+  if (habia) {
+    const d = descargaAproximada(T, $('puerto').value, $('material').value, $('ligera').checked, $('grupo3').checked);
+    $('n-descarga').textContent = 'EUR/MT; las tarifas del puerto dan ' + n(d.valor);
+    pintar();
+  } else proponer(false);
+}
+if (typeof module !== 'undefined') module.exports = { calcular, descargaAproximada, extraCuotas, PARTIDA };
+</script>
+</body>
+</html>
